@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import Typed from 'react-typed';
+import Typed from 'typed.js';
 
 // Portfolio data
 const portfolioData = {
@@ -76,6 +76,7 @@ const portfolioData = {
 
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
+  const typedRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -91,6 +92,22 @@ export default function Home() {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  useEffect(() => {
+    if (typedRef.current && portfolioData.roles.length > 0) {
+      const typed = new Typed(typedRef.current, {
+        strings: portfolioData.roles,
+        typeSpeed: 50,
+        backSpeed: 30,
+        backDelay: 1500,
+        loop: true,
+      });
+
+      return () => {
+        typed.destroy();
+      };
+    }
+  }, [portfolioData.roles]);
 
   return (
     <main>
@@ -110,7 +127,47 @@ export default function Home() {
       </header>
 
       <div className="container mx-auto px-4 pt-16">
-        {/* All sections will be rendered here */}
+        {/* Hero Section */}
+        <section className="py-20 md:py-32 flex flex-col md:flex-row items-center justify-between">
+          <motion.div 
+            className="md:w-1/2 mb-8 md:mb-0"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{portfolioData.fullName}</h1>
+            <h2 className="text-2xl md:text-3xl theme-color mb-4">{portfolioData.title}</h2>
+            <div className="h-8 mb-6">
+              <span ref={typedRef} className="text-lg"></span>
+            </div>
+            <p className="text-lg mb-6">{portfolioData.about.substring(0, 150)}...</p>
+            <a 
+              href="#about" 
+              className="theme-bg text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity"
+            >
+              Learn More
+            </a>
+          </motion.div>
+          
+          {portfolioData.profileImage && (
+            <motion.div 
+              className="md:w-1/3"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              <div className="rounded-full overflow-hidden border-4 border-gray-200 w-64 h-64 mx-auto">
+                <img 
+                  src={portfolioData.profileImage} 
+                  alt={portfolioData.fullName} 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </motion.div>
+          )}
+        </section>
+
+        {/* Rest of the sections... */}
       </div>
 
       <footer className="theme-bg text-white py-6">
