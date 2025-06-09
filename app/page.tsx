@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
-import Typed from 'typed.js';
+import { motion, useInView } from 'framer-motion';
+import Image from 'next/image';
 
 // Portfolio data
 const portfolioData = {
@@ -74,10 +74,369 @@ const portfolioData = {
   ]
 };
 
-export default function Home() {
-  const [scrolled, setScrolled] = useState(false);
-  const typedRef = useRef(null);
+// Typing Animation Component
+function TypingAnimation({ phrases }: { phrases: string[] }) {
+  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
+  const [currentText, setCurrentText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const currentPhrase = phrases[currentPhraseIndex];
+      
+      if (isDeleting) {
+        setCurrentText(currentPhrase.substring(0, currentText.length - 1));
+      } else {
+        setCurrentText(currentPhrase.substring(0, currentText.length + 1));
+      }
+      
+      if (!isDeleting && currentText === currentPhrase) {
+        setTimeout(() => setIsDeleting(true), 1500);
+      } else if (isDeleting && currentText === "") {
+        setIsDeleting(false);
+        setCurrentPhraseIndex((currentPhraseIndex + 1) % phrases.length);
+      }
+    }, isDeleting ? 50 : 100);
+    
+    return () => clearTimeout(timeoutId);
+  }, [currentText, currentPhraseIndex, isDeleting, phrases]);
+  
+  return <span>{currentText}<span className="animate-blink">|</span></span>;
+}
+
+// Hero Background Animation
+function HeroBgAnimation() {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center opacity-10">
+      <div className="relative w-full max-w-6xl h-full max-h-[600px]">
+        <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-r from-blue-500/30 to-purple-500/30 blur-3xl"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-1/3 left-1/3 w-96 h-96 bg-pink-500/20 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+      </div>
+    </div>
+  );
+}
+
+// Hero Section
+function HeroSection({ name, title, roles, profileImage }) {
+  return (
+    <section className="min-h-screen flex flex-col justify-center items-center text-center py-20 relative">
+      {/* Background Animation */}
+      <div className="absolute inset-0 overflow-hidden">
+        <HeroBgAnimation />
+      </div>
+      
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="space-y-6 max-w-4xl w-full px-4 relative z-10"
+      >
+        <div className="flex flex-col md:flex-row items-center justify-center gap-8">
+          {profileImage && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="w-56 h-56 md:w-64 md:h-64 relative overflow-hidden rounded-full border-4 border-theme shadow-lg"
+            >
+              <img
+                src={profileImage || "/placeholder.svg"}
+                alt={name}
+                className="object-cover transition-transform duration-300 hover:scale-110 hover:rotate-3 w-full h-full"
+              />
+            </motion.div>
+          )}
+
+          <div className="text-left">
+            <h2 className="text-xl md:text-2xl mb-2">Hi, I am</h2>
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 text-theme">{name}</h1>
+            <div className="text-xl md:text-2xl mb-2">
+              I am a{" "}
+              <span className="text-theme font-medium">
+                {roles && roles.length > 0 ? <TypingAnimation phrases={roles} /> : title}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+          className="flex justify-center mt-8"
+        >
+          <button
+            onClick={() => {
+              document.getElementById("about")?.scrollIntoView({ behavior: "smooth" })
+            }}
+            className="animate-bounce bg-theme text-white rounded-full p-3"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-6 w-6"
+            >
+              <path d="M12 5v14" />
+              <path d="m19 12-7 7-7-7" />
+            </svg>
+          </button>
+        </motion.div>
+      </motion.div>
+    </section>
+  );
+}
+
+// About Section
+function AboutSection({ about }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  return (
+    <section id="about" className="py-20">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6">
+        <motion.div
+          ref={ref}
+          initial={{ opacity: 0, y: 50 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+          transition={{ duration: 0.8 }}
+          className="space-y-6"
+        >
+          <h2 className="text-3xl font-bold text-theme">About Me</h2>
+          <div className="h-0.5 w-16 bg-theme"></div>
+          <p className="text-lg leading-relaxed text-muted-foreground whitespace-pre-line">{about}</p>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// Skills Section
+function SkillsSection({ skills }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  return (
+    <section id="skills" className="py-20 bg-secondary/30">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <motion.div
+          ref={ref}
+          initial={{ opacity: 0, y: 50 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+          transition={{ duration: 0.8 }}
+          className="space-y-8"
+        >
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-theme mb-4">Skills & Technologies</h2>
+            <div className="h-0.5 w-16 bg-theme mx-auto"></div>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-3">
+            {skills && skills.map((skill, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="bg-card text-card-foreground shadow-sm rounded-full px-4 py-2 border"
+              >
+                {skill}
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// Experience Section
+function ExperienceSection({ experience }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  return (
+    <section id="experience" className="py-20">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <motion.div
+          ref={ref}
+          initial={{ opacity: 0, y: 50 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+          transition={{ duration: 0.8 }}
+          className="space-y-8"
+        >
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-theme mb-4">Work Experience</h2>
+            <div className="h-0.5 w-16 bg-theme mx-auto"></div>
+          </div>
+
+          <div className="space-y-12">
+            {experience && experience.map((job, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 50 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="border-l-4 border-theme pl-6 space-y-2 relative"
+              >
+                <div className="absolute w-4 h-4 bg-theme rounded-full -left-[10px] top-0"></div>
+                <div className="text-lg font-semibold">{job.position}</div>
+                <div className="text-muted-foreground flex flex-col sm:flex-row sm:justify-between">
+                  <span>{job.company}</span>
+                  <span>{job.duration}</span>
+                </div>
+                <p className="mt-2 text-muted-foreground">{job.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// Projects Section
+function ProjectsSection({ projects }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  return (
+    <section id="projects" className="py-20 bg-secondary/30">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <motion.div
+          ref={ref}
+          initial={{ opacity: 0, y: 50 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+          transition={{ duration: 0.8 }}
+          className="space-y-8"
+        >
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-theme mb-4">Projects</h2>
+            <div className="h-0.5 w-16 bg-theme mx-auto"></div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {projects && projects.map((project, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 50 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="bg-card text-card-foreground rounded-lg shadow-lg overflow-hidden border border-border/40 hover:shadow-xl transition-shadow duration-300"
+              >
+                {project.image && (
+                  <div className="h-48 overflow-hidden">
+                    <img
+                      src={project.image}
+                      alt={project.title}
+                      className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                    />
+                  </div>
+                )}
+                <div className="p-6">
+                  <h3 className="text-xl font-bold mb-2">{project.title}</h3>
+                  <p className="text-muted-foreground mb-4">{project.description}</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {project.technologies && project.technologies.map((tech, techIndex) => (
+                      <span
+                        key={techIndex}
+                        className="text-xs bg-secondary px-2 py-1 rounded-full text-secondary-foreground"
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                  {project.link && (
+                    <a
+                      href={project.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-theme hover:underline text-sm inline-flex items-center"
+                    >
+                      View Project
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="ml-1 h-4 w-4"
+                      >
+                        <path d="M7 7h10v10" />
+                        <path d="M7 17 17 7" />
+                      </svg>
+                    </a>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// Education Section
+function EducationSection({ education }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+
+  return (
+    <section id="education" className="py-20">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <motion.div
+          ref={ref}
+          initial={{ opacity: 0, y: 50 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+          transition={{ duration: 0.8 }}
+          className="space-y-8"
+        >
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-theme mb-4">Education</h2>
+            <div className="h-0.5 w-16 bg-theme mx-auto"></div>
+          </div>
+
+          <div className="space-y-8">
+            {education && education.map((edu, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 50 }}
+                animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="border-l-4 border-theme pl-6 space-y-2 relative"
+              >
+                <div className="absolute w-4 h-4 bg-theme rounded-full -left-[10px] top-0"></div>
+                <div className="text-lg font-semibold">{edu.school}</div>
+                <div className="text-muted-foreground flex flex-col sm:flex-row sm:justify-between">
+                  <span>{edu.degree}</span>
+                  <span>{edu.year}</span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// Portfolio Navbar
+function PortfolioNavbar({ name }) {
+  const [scrolled, setScrolled] = useState(false);
+  
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 50) {
@@ -86,95 +445,57 @@ export default function Home() {
         setScrolled(false);
       }
     };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+    
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  useEffect(() => {
-    if (typedRef.current && portfolioData.roles.length > 0) {
-      const typed = new Typed(typedRef.current, {
-        strings: portfolioData.roles,
-        typeSpeed: 50,
-        backSpeed: 30,
-        backDelay: 1500,
-        loop: true,
-      });
-
-      return () => {
-        typed.destroy();
-      };
-    }
-  }, [portfolioData.roles]);
-
+  
   return (
-    <main>
-      <header className={scrolled ? 'fixed w-full z-50 bg-white shadow-md py-2' : 'fixed w-full z-50 py-4'}>
-        <div className="container mx-auto px-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold">{portfolioData.fullName}</h1>
-          <nav>
-            <ul className="flex space-x-6">
-              <li><a href="#about">About</a></li>
-              <li><a href="#skills">Skills</a></li>
-              <li><a href="#experience">Experience</a></li>
-              <li><a href="#projects">Projects</a></li>
-              <li><a href="#education">Education</a></li>
-            </ul>
-          </nav>
-        </div>
-      </header>
-
-      <div className="container mx-auto px-4 pt-16">
-        {/* Hero Section */}
-        <section className="py-20 md:py-32 flex flex-col md:flex-row items-center justify-between">
-          <motion.div 
-            className="md:w-1/2 mb-8 md:mb-0"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">{portfolioData.fullName}</h1>
-            <h2 className="text-2xl md:text-3xl theme-color mb-4">{portfolioData.title}</h2>
-            <div className="h-8 mb-6">
-              <span ref={typedRef} className="text-lg"></span>
-            </div>
-            <p className="text-lg mb-6">{portfolioData.about.substring(0, 150)}...</p>
-            <a 
-              href="#about" 
-              className="theme-bg text-white px-6 py-3 rounded-lg hover:opacity-90 transition-opacity"
-            >
-              Learn More
-            </a>
-          </motion.div>
-          
-          {portfolioData.profileImage && (
-            <motion.div 
-              className="md:w-1/3"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <div className="rounded-full overflow-hidden border-4 border-gray-200 w-64 h-64 mx-auto">
-                <img 
-                  src={portfolioData.profileImage} 
-                  alt={portfolioData.fullName} 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </motion.div>
-          )}
-        </section>
-
-        {/* Rest of the sections... */}
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-background/90 backdrop-blur-md shadow-sm py-2" : "py-4"}`}>
+      <div className="container mx-auto px-4 flex justify-between items-center">
+        <h1 className="text-xl font-bold">{name}</h1>
+        <nav>
+          <ul className="flex space-x-6">
+            <li><a href="#about" className="text-foreground/80 hover:text-theme transition-colors">About</a></li>
+            <li><a href="#skills" className="text-foreground/80 hover:text-theme transition-colors">Skills</a></li>
+            <li><a href="#experience" className="text-foreground/80 hover:text-theme transition-colors">Experience</a></li>
+            <li><a href="#projects" className="text-foreground/80 hover:text-theme transition-colors">Projects</a></li>
+            <li><a href="#education" className="text-foreground/80 hover:text-theme transition-colors">Education</a></li>
+          </ul>
+        </nav>
       </div>
+    </header>
+  );
+}
 
-      <footer className="theme-bg text-white py-6">
+// Main Component
+export default function Home() {
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <PortfolioNavbar name={portfolioData.fullName} />
+
+      <HeroSection
+        name={portfolioData.fullName}
+        title={portfolioData.title}
+        roles={portfolioData.roles}
+        profileImage={portfolioData.profileImage}
+      />
+
+      <AboutSection about={portfolioData.about} />
+
+      <SkillsSection skills={portfolioData.skills} />
+
+      <ExperienceSection experience={portfolioData.experience} />
+
+      <ProjectsSection projects={portfolioData.projects} />
+
+      <EducationSection education={portfolioData.education} />
+
+      <footer className="bg-theme text-white py-6">
         <div className="container mx-auto px-4 text-center">
           <p>&copy; {new Date().getFullYear()} {portfolioData.fullName}. All rights reserved.</p>
         </div>
       </footer>
-    </main>
+    </div>
   );
 }
