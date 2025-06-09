@@ -119,7 +119,12 @@ function HeroBgAnimation() {
 }
 
 // Hero Section
-function HeroSection({ name, title, roles, profileImage }) {
+function HeroSection({ name, title, roles, profileImage }: { 
+  name: string; 
+  title: string; 
+  roles?: string[]; 
+  profileImage?: string; 
+}) {
   return (
     <section className="min-h-screen flex flex-col justify-center items-center text-center py-20 relative">
       {/* Background Animation */}
@@ -142,7 +147,7 @@ function HeroSection({ name, title, roles, profileImage }) {
               className="w-56 h-56 md:w-64 md:h-64 relative overflow-hidden rounded-full border-4 border-theme shadow-lg"
             >
               <img
-                src={profileImage || "/placeholder.svg"}
+                src={profileImage}
                 alt={name}
                 className="object-cover transition-transform duration-300 hover:scale-110 hover:rotate-3 w-full h-full"
               />
@@ -196,7 +201,7 @@ function HeroSection({ name, title, roles, profileImage }) {
 }
 
 // About Section
-function AboutSection({ about }) {
+function AboutSection({ about }: { about: string }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -220,7 +225,7 @@ function AboutSection({ about }) {
 }
 
 // Skills Section
-function SkillsSection({ skills }) {
+function SkillsSection({ skills }: { skills: string[] }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -259,7 +264,14 @@ function SkillsSection({ skills }) {
 }
 
 // Experience Section
-function ExperienceSection({ experience }) {
+function ExperienceSection({ experience }: { 
+  experience: Array<{
+    position: string;
+    company: string;
+    duration: string;
+    description: string;
+  }>;
+}) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -304,7 +316,15 @@ function ExperienceSection({ experience }) {
 }
 
 // Projects Section
-function ProjectsSection({ projects }) {
+function ProjectsSection({ projects }: { 
+  projects: Array<{
+    title: string;
+    description: string;
+    technologies: string[];
+    link?: string;
+    image?: string;
+  }>;
+}) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -390,7 +410,13 @@ function ProjectsSection({ projects }) {
 }
 
 // Education Section
-function EducationSection({ education }) {
+function EducationSection({ education }: { 
+  education: Array<{
+    school: string;
+    degree: string;
+    year: string;
+  }>;
+}) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -434,7 +460,7 @@ function EducationSection({ education }) {
 }
 
 // Portfolio Navbar
-function PortfolioNavbar({ name }) {
+function PortfolioNavbar({ name }: { name: string }) {
   const [scrolled, setScrolled] = useState(false);
   
   useEffect(() => {
