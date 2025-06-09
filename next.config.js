@@ -3,14 +3,10 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
     unoptimized: true,
+    domains: ['*'],
   },
+  transpilePackages: ["lucide-react"],
 }
 
 module.exports = nextConfig
