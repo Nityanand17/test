@@ -18,7 +18,8 @@ I am a motivated and versatile full-stack web developer with expertise in UI/UX 
 
 First, install the dependencies:
 
-```bash
+
+'''bash
 npm install
 # or
 yarn install
