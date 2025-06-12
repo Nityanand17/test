@@ -82,6 +82,15 @@ const mappedExperience = portfolioData.experience ? portfolioData.experience.map
   description: exp.description
 })) : [];
 
+// Map projects data - convert 'name' property to 'title' property
+const mappedProjects = portfolioData.projects ? portfolioData.projects.map(proj => ({
+  title: proj.name,
+  description: proj.description,
+  technologies: proj.technologies,
+  link: proj.link,
+  image: proj.image
+})) : [];
+
 // Typing Animation Component
 function TypingAnimation({ phrases }: { phrases: string[] }) {
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
@@ -521,7 +530,7 @@ export default function Home() {
 
       <ExperienceSection experience={mappedExperience} />
 
-      <ProjectsSection projects={portfolioData.projects} />
+      <ProjectsSection projects={mappedProjects} />
 
       <EducationSection education={portfolioData.education} />
 
