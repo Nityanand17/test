@@ -88,7 +88,7 @@ const mappedProjects = portfolioData.projects ? portfolioData.projects.map(proj 
   description: proj.description,
   technologies: proj.technologies,
   link: proj.link,
-  image: proj.image || null
+  ...(proj.hasOwnProperty('image') && { image: proj.image }) // Safely include image only if it exists
 })) : [];
 
 // Typing Animation Component
