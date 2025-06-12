@@ -88,7 +88,7 @@ const mappedProjects = portfolioData.projects ? portfolioData.projects.map(proj 
   description: proj.description,
   technologies: proj.technologies,
   link: proj.link,
-  image: proj.image
+  image: proj.image || null
 })) : [];
 
 // Typing Animation Component
