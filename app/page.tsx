@@ -4,8 +4,42 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import Image from 'next/image';
 
-// Portfolio data
-const portfolioData = {
+interface Project {
+  name: string;
+  description: string;
+  technologies: string[];
+  link: string;
+  image?: string;
+}
+
+interface Experience {
+  role: string;
+  company: string;
+  duration: string;
+  description: string;
+}
+
+interface Education {
+  school: string;
+  degree: string;
+  year: string;
+}
+
+interface PortfolioData {
+  fullName: string;
+  title: string;
+  about: string;
+  skills: string[];
+  experience?: Experience[];
+  projects?: Project[];
+  education?: Education[];
+  roles?: string[];
+  profileImage?: string;
+  themeColor?: string;
+}
+
+// Portfolio data with proper typing
+const portfolioData: PortfolioData = {
   "fullName": "Nityanand yadav",
   "title": "Frontend Developer",
   "about": "I am a motivated and versatile full-stack web developer with expertise in UI/UX design, programming, and DSA. Passionate about learning and problem-solving, I strive to deliver high-quality results with a growth mindset.",
@@ -74,7 +108,7 @@ const portfolioData = {
   ]
 };
 
-// Map experience data - convert 'role' property to 'position' property
+// Map experience data
 const mappedExperience = portfolioData.experience ? portfolioData.experience.map(exp => ({
   position: exp.role,
   company: exp.company,
@@ -88,7 +122,7 @@ const mappedProjects = portfolioData.projects ? portfolioData.projects.map(proj 
   description: proj.description,
   technologies: proj.technologies,
   link: proj.link,
-  ...(proj.hasOwnProperty('image') && { image: proj.image }) // Safely include image only if it exists
+  ...(proj.image ? { image: proj.image } : {}) // Safely include image only if it exists
 })) : [];
 
 // Typing Animation Component
